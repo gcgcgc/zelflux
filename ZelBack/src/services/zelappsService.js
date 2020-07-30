@@ -3485,7 +3485,7 @@ async function getRunningAppList(appName) {
   return results;
 }
 
-async function getApplicationSpecifications(appName) {
+async function getApplicationSpecifications(appName, caseSensitive = true) {
   // zelAppSpecs: {
   //   version: 1,
   //   name: 'FoldingAtHomeB',
@@ -3515,8 +3515,10 @@ async function getApplicationSpecifications(appName) {
   // };
   const db = serviceHelper.databaseConnection();
   const database = db.db(config.database.zelappsglobal.database);
-
-  const query = { name: appName };
+  let query = { name: appName };
+  if (!caseSensitive) {
+    query = { name: new RegExp(`^${appName}$`, 'i') }; // case insensitive
+  }
   const projection = {
     projection: {
       _id: 0,

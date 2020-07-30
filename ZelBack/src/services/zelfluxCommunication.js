@@ -1148,6 +1148,12 @@ async function adjustFirewall() {
   const execC = `sudo ufw allow out ${config.server.apiport}`;
   const execD = `sudo ufw allow ${config.server.zelfrontport}`;
   const execE = `sudo ufw allow out ${config.server.zelfrontport}`;
+  const execF = 'sudo ufw allow 80';
+  const execG = 'sudo ufw allow out 80';
+  const execH = 'sudo ufw allow 443';
+  const execI = 'sudo ufw allow out 443';
+  const execJ = `sudo ufw allow ${config.server.vhost}`;
+  const execK = `sudo ufw allow out ${config.server.vhost}`;
   const cmdAsync = util.promisify(cmd.get);
 
   const cmdresA = await cmdAsync(execA);
@@ -1175,6 +1181,42 @@ async function adjustFirewall() {
       log.info('Outgoing Firewall adjusted for ZelFront port');
     } else {
       log.info('Failed to adjust Firewall for outgoing ZelFront port');
+    }
+    const cmdresF = await cmdAsync(execF);
+    if (serviceHelper.ensureString(cmdresF).includes('updated') || serviceHelper.ensureString(cmdresF).includes('existing') || serviceHelper.ensureString(cmdresF).includes('added')) {
+      log.info('Firewall adjusted for incoming port 80');
+    } else {
+      log.info('Failed to adjust Firewall for incoming port 80');
+    }
+    const cmdresG = await cmdAsync(execG);
+    if (serviceHelper.ensureString(cmdresG).includes('updated') || serviceHelper.ensureString(cmdresG).includes('existing') || serviceHelper.ensureString(cmdresG).includes('added')) {
+      log.info('Firewall adjusted for outgoing port 80');
+    } else {
+      log.info('Failed to adjust Firewall for outgoing port 80');
+    }
+    const cmdresH = await cmdAsync(execH);
+    if (serviceHelper.ensureString(cmdresH).includes('updated') || serviceHelper.ensureString(cmdresH).includes('existing') || serviceHelper.ensureString(cmdresH).includes('added')) {
+      log.info('Firewall adjusted for incoming port 443');
+    } else {
+      log.info('Failed to adjust Firewall for incoming port 443');
+    }
+    const cmdresI = await cmdAsync(execI);
+    if (serviceHelper.ensureString(cmdresI).includes('updated') || serviceHelper.ensureString(cmdresI).includes('existing') || serviceHelper.ensureString(cmdresI).includes('added')) {
+      log.info('Firewall adjusted for outgoing port 443');
+    } else {
+      log.info('Failed to adjust Firewall for outgoing port 443');
+    }
+    const cmdresJ = await cmdAsync(execJ);
+    if (serviceHelper.ensureString(cmdresJ).includes('updated') || serviceHelper.ensureString(cmdresJ).includes('existing') || serviceHelper.ensureString(cmdresJ).includes('added')) {
+      log.info('Incoming Firewall adjusted for VHost port');
+    } else {
+      log.info('Failed to adjust Firewall for incoming VHost port');
+    }
+    const cmdresK = await cmdAsync(execK);
+    if (serviceHelper.ensureString(cmdresK).includes('updated') || serviceHelper.ensureString(cmdresK).includes('existing') || serviceHelper.ensureString(cmdresK).includes('added')) {
+      log.info('Outgoing Firewall adjusted for VHost port');
+    } else {
+      log.info('Failed to adjust Firewall for outgoing VHost port');
     }
   } else {
     log.info('Firewall is not active. Adjusting not applied');

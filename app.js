@@ -1,6 +1,7 @@
 process.env.NODE_CONFIG_DIR = `${__dirname}/ZelBack/config/`;
 // ZelBack configuration
 const config = require('config');
+const vhost = require('vhost');
 // const fs = require('fs');
 // const https = require('https');
 const path = require('path');
@@ -8,6 +9,7 @@ const express = require('express');
 const app = require('./ZelBack/src/lib/server.js');
 const log = require('./ZelBack/src/lib/log');
 const serviceManager = require('./ZelBack/src/services/serviceManager');
+const resolveApplication = require('./ZelBack/src/services/resolveApplication');
 
 // const key = fs.readFileSync(path.join(__dirname, './certs/selfsigned.key'), 'utf8');
 // const cert = fs.readFileSync(path.join(__dirname, './certs/selfsigned.crt'), 'utf8');
@@ -36,3 +38,23 @@ ZelFrontApp.get('*', (req, res) => {
 ZelFrontApp.listen(config.server.zelfrontport, () => {
   log.info(`ZelFront running on port ${config.server.zelfrontport}!`);
 });
+
+const mainApp = express();
+mainApp.use(vhost('*.api.fluxos.network', app));
+mainApp.use(vhost('*.ui.fluxos.network', ZelFrontApp));
+mainApp.use(vhost('*.app.fluxos.network', async (req, res) => {
+  try {
+    console.log(req.vhost);
+    const port = await resolveApplication.getAppPort(req.vhost['0']);
+    if (port) {
+      res.redirect(`http://localhost:${port}`);
+    } else {
+      res.setHeader('Content-Type', 'text/plain');
+      res.end('Application unavailable');
+    }
+  } catch (error) {
+    res.setHeader('Content-Type', 'text/plain');
+    res.end('Request resulted with error');
+  }
+}));
+mainApp.listen(16128);
