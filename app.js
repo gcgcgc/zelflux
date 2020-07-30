@@ -42,10 +42,25 @@ ZelFrontApp.listen(config.server.zelfrontport, () => {
 const mainApp = express();
 mainApp.use(vhost('*.api.fluxos.network', app));
 mainApp.use(vhost('*.ui.fluxos.network', ZelFrontApp));
-mainApp.use(vhost('*.*.app.fluxos.network', async (req, res) => {
+mainApp.use(vhost('*.app.fluxos.network', async (req, res) => {
   try {
     console.log(req.vhost);
     const port = await resolveApplication.getAppPort(req.vhost['0']);
+    if (port) {
+      res.redirect(`http://${req.vhost.hostname}:${port}`);
+    } else {
+      res.setHeader('Content-Type', 'text/plain');
+      res.end('Application unavailable');
+    }
+  } catch (error) {
+    res.setHeader('Content-Type', 'text/plain');
+    res.end('Request resulted with error');
+  }
+}));
+mainApp.use(vhost('*.*.app.fluxos.network', async (req, res) => {
+  try {
+    console.log(req.vhost);
+    const port = await resolveApplication.getAppPort(req.vhost['1']);
     if (port) {
       res.redirect(`http://${req.vhost.hostname}:${port}`);
     } else {
